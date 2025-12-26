@@ -1,7 +1,9 @@
 
 # Sketch Tracer
-https://beauterre.github.io/sketchTracer/
-https://chatgpt.com/c/694e5bb0-fa88-832d-b8c4-9d0382341eab
+
+*TRY:* https://beauterre.github.io/sketchTracer/
+
+*PAIR PROGRAMMING:* https://chatgpt.com/c/694e5bb0-fa88-832d-b8c4-9d0382341eab
 
 A tool to trace a sketch over an original painting by dynamically uploading images.
 
