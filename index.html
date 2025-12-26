@@ -39,7 +39,10 @@
 <a href="https://github.com/beauterre/sketchTracer">back to code</a>
 <div id="uploadArea">
   <label>1. Upload Original Image: <input type="file" id="originalInput" accept="image/*"></label>
+  <div id="originalPreview" style="margin-bottom:10px;"></div>
+
   <label>2. Upload Target/Sketch Image: <input type="file" id="evolveInput" accept="image/*"></label>
+  <div id="evolvePreview" style="margin-bottom:10px;"></div>
 </div>
 
 <div id="container" style="display:none;">
@@ -75,25 +78,47 @@ function startFading() {
 }
 
 // Handle file uploads
-function handleFileInput(input, imgElement) {
+// Handle file uploads with preview
+function handleFileInput(input, imgElement, previewDiv) {
   const file = input.files[0];
   if(file) {
     const url = URL.createObjectURL(file);
     imgElement.src = url;
+
+    // Create preview
+    const previewImg = document.createElement('img');
+    previewImg.src = url;
+    previewImg.style.maxWidth = "100px";
+    previewImg.style.maxHeight = "100px";
+    previewImg.style.display = "block";
+    previewImg.style.marginTop = "5px";
+
+    // Show actual size once loaded
+    previewImg.onload = () => {
+      const sizeInfo = document.createElement('span');
+      sizeInfo.textContent = `Actual size: ${previewImg.naturalWidth} x ${previewImg.naturalHeight}px`;
+      sizeInfo.style.display = "block";
+      previewDiv.innerHTML = ""; // clear previous preview
+      previewDiv.appendChild(previewImg);
+      previewDiv.appendChild(sizeInfo);
+
+      // Set imgElement in preview mode
+      imgElement.style.width = "200px"; // preview mode
+    };
   }
 }
 
 document.getElementById('originalInput').addEventListener('change', (e) => {
-  handleFileInput(e.target, originalImg);
+  handleFileInput(e.target, originalImg, document.getElementById('originalPreview'));
   checkAllLoaded();
 });
 
 document.getElementById('evolveInput').addEventListener('change', (e) => {
-  handleFileInput(e.target, evolveImg);
+  handleFileInput(e.target, evolveImg, document.getElementById('evolvePreview'));
   checkAllLoaded();
 });
 
-function checkAllLoaded() {
+  function checkAllLoaded() {
   if(originalImg.src && evolveImg.src) {
     container.style.display = 'block';
     document.getElementById('uploadArea').style.display = 'none';
