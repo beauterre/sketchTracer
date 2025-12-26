@@ -24,31 +24,44 @@
     pointer-events: none;
     transition: opacity 0.1s linear;
   }
+  #uploadArea {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    font-family: sans-serif;
+  }
+  #uploadArea label {
+    margin: 5px 0;
+  }
 </style>
 </head>
 <body>
-<div id="container">
-  <img id="original" src="original.jpg" alt="Original Painting">
-  <img id="evolve" src="evolve.jpg" alt="Sketch Overlay" style="opacity:1;">
+<a href="https://github.com/beauterre/sketchTracer/edit/main/index.html">back to code</a>
+<div id="uploadArea">
+  <label>1. Upload Original Image: <input type="file" id="originalInput" accept="image/*"></label>
+  <label>2. Upload Target/Sketch Image: <input type="file" id="evolveInput" accept="image/*"></label>
+</div>
+
+<div id="container" style="display:none;">
+  <img id="original" src="" alt="Original">
+  <img id="evolve" src="" alt="Evolve" style="opacity:1;">
 </div>
 
 <script>
+const container = document.getElementById('container');
+const originalImg = document.getElementById('original');
+const evolveImg = document.getElementById('evolve');
+
 let opacity = 1;
 let interval = null;
-let fadeSpeed = 100; // default medium (4)
-const evolve = document.getElementById('evolve');
+let fadeSpeed = 100;
 
-// Map keys to fade speeds in milliseconds
-const speedMap = {
-  '3': 50,    // fast
-  '4': 100,   // medium
-  '5': 250,   // slow
-  '6': 500    // very slow
-};
+// Map keys to fade speeds in ms
+const speedMap = { '3': 50, '4': 100, '5': 250, '6': 500 };
 
 function setOpacity(value) {
   opacity = Math.max(0, Math.min(1, value));
-  evolve.style.opacity = opacity;
+  evolveImg.style.opacity = opacity;
 }
 
 function startFading() {
@@ -56,11 +69,39 @@ function startFading() {
   interval = setInterval(() => {
     if(opacity > 0) {
       opacity -= 0.01;
-      evolve.style.opacity = opacity;
+      evolveImg.style.opacity = opacity;
     }
   }, fadeSpeed);
 }
 
+// Handle file uploads
+function handleFileInput(input, imgElement) {
+  const file = input.files[0];
+  if(file) {
+    const url = URL.createObjectURL(file);
+    imgElement.src = url;
+  }
+}
+
+document.getElementById('originalInput').addEventListener('change', (e) => {
+  handleFileInput(e.target, originalImg);
+  checkAllLoaded();
+});
+
+document.getElementById('evolveInput').addEventListener('change', (e) => {
+  handleFileInput(e.target, evolveImg);
+  checkAllLoaded();
+});
+
+function checkAllLoaded() {
+  if(originalImg.src && evolveImg.src) {
+    container.style.display = 'block';
+    document.getElementById('uploadArea').style.display = 'none';
+    startFading();
+  }
+}
+
+// Keyboard controls
 document.addEventListener('keydown', (e) => {
   const key = e.key;
   if(speedMap[key]) {
@@ -72,9 +113,6 @@ document.addEventListener('keydown', (e) => {
     setOpacity(1);
   }
 });
-
-// Initialize fade if desired
-startFading();
 </script>
 </body>
 </html>
