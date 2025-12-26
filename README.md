@@ -1,31 +1,27 @@
-# Sketch Tracer
 
+# Sketch Tracer
 https://beauterre.github.io/sketchTracer/
 
-This HTML page allows you to trace a sketch overlay (`evolve.jpg`) over an original painting (`original.jpg`) by controlling the opacity of the overlay interactively.
+A tool to trace a sketch over an original painting by dynamically uploading images.
 
-## Features
+## Workflow
 
-- Absolute stacking of two images of the same size.
-- Fade the top image (`evolve.jpg`) at different speeds.
-- Keyboard controls for opacity and fade speed:
-  - `1` → Fully transparent (opacity 0)
-  - `2` → Fully opaque (opacity 1)
-  - `3` → Fast fade
-  - `4` → Medium fade
-  - `5` → Slow fade
-  - `6` → Very slow fade
-- Zoom in/out using the browser’s `+` and `-` keys.
-- Scroll to different parts of the image with standard scrollbars.
+1. Open the page in a browser.
+2. Upload **Original Image** first.
+3. Upload **Target/Sketch Image** second.
+4. Once both images are loaded, they are stacked for tracing.
 
-## Setup
+## Controls
 
-1. Place `original.jpg` and `evolve.jpg` in the same folder as `index.html`.
-2. Open `index.html` in a modern browser.
-3. Use the keyboard controls to adjust opacity or fading speed while tracing.
+- `1` → Fully transparent overlay (opacity 0)  
+- `2` → Fully opaque overlay (opacity 1)  
+- `3` → Fast fade  
+- `4` → Medium fade  
+- `5` → Slow fade  
+- `6` → Very slow fade  
 
 ## Notes
 
-- Both images **must have exactly the same dimensions**.
-- Fade speed is adjustable in real-time via keys `3-6`.
-- Zooming is done via browser zoom; no custom zoom logic is implemented.
+- Both images **must have exactly the same dimensions**.  
+- Zoom using the browser’s zoom (`Ctrl` + `+` / `-`).  
+- Scrollbars allow navigation of large images.  
