@@ -23,7 +23,7 @@
     display: block;
     user-select: none;
     pointer-events: none;
-    transition: opacity 0.1s linear;
+    transition: opacity 0.05s linear;
   }
   .uploadArea {
     display: flex;
@@ -41,13 +41,13 @@
   }
   button {
     margin-top: 10px;
-    width: 200px;
+    width: 250px;
     padding: 5px;
   }
 </style>
 </head>
 <body>
-<a href="https://github.com/beauterre/sketchTracer">back to code</a> v 26-12-2025-11-27
+<a href="https://github.com/beauterre/sketchTracer">back to code</a> v 26-12-2025-11-45
 
 <!-- Phase 1: Upload Original Image -->
 <div id="phase1" class="uploadArea">
@@ -69,16 +69,24 @@
     <img id="original" src="" alt="Original">
     <img id="evolve" src="" alt="Evolve" style="opacity:1;">
   </div>
-  <p>Use keys 1-2 for opacity and 3-6 for fade speed. Zoom with browser, scroll as needed.</p>
+  <p>Keys: 1 → transparent, 2 → opaque, 3 → fast, 4 → medium, 5 → slow, 6 → stopped fade. Zoom with browser, scroll as needed.</p>
 </div>
 
 <script>
 const originalImg = document.getElementById('original');
 const evolveImg = document.getElementById('evolve');
+
 let opacity = 1;
 let interval = null;
-let fadeSpeed = 100;
-const speedMap = { '3': 50, '4': 100, '5': 250, '6': 500 };
+let fadeSpeed = 0; // milliseconds between opacity steps, 0 = stopped
+
+// Key to fade speed mapping
+const speedMap = {
+  '3': 20,    // fast
+  '4': 50,    // medium
+  '5': 150,   // slow
+  '6': 0      // stopped
+};
 
 // Handle file uploads with preview
 function handleFileInput(input, imgElement, previewDiv, nextButton) {
@@ -101,8 +109,7 @@ function handleFileInput(input, imgElement, previewDiv, nextButton) {
       previewDiv.innerHTML = "";
       previewDiv.appendChild(previewImg);
       previewDiv.appendChild(sizeInfo);
-      imgElement.style.width = "200px"; // preview mode
-      nextButton.disabled = false; // enable next phase button
+      nextButton.disabled = false;
     };
   }
 }
@@ -130,7 +137,7 @@ nextToPhase3.addEventListener('click', () => {
   startFading();
 });
 
-// Opacity and fade controls
+// Fade logic
 function setOpacity(value) {
   opacity = Math.max(0, Math.min(1, value));
   evolveImg.style.opacity = opacity;
@@ -138,6 +145,7 @@ function setOpacity(value) {
 
 function startFading() {
   if(interval) clearInterval(interval);
+  if(fadeSpeed === 0) return; // stopped
   interval = setInterval(() => {
     if(opacity > 0) {
       opacity -= 0.01;
@@ -146,9 +154,10 @@ function startFading() {
   }, fadeSpeed);
 }
 
+// Keyboard controls
 document.addEventListener('keydown', (e) => {
   const key = e.key;
-  if(speedMap[key]) {
+  if(speedMap.hasOwnProperty(key)) {
     fadeSpeed = speedMap[key];
     startFading();
   } else if(key === '1') {
