@@ -14,6 +14,7 @@
   #container {
     position: relative;
     width: max-content;
+    margin-top: 20px;
   }
   #container img {
     position: absolute;
@@ -24,44 +25,112 @@
     pointer-events: none;
     transition: opacity 0.1s linear;
   }
-  #uploadArea {
+  .uploadArea {
     display: flex;
     flex-direction: column;
     padding: 20px;
     font-family: sans-serif;
+    max-height: 80vh;
+    overflow-y: auto;
   }
-  #uploadArea label {
+  .uploadArea label {
     margin: 5px 0;
+  }
+  .preview {
+    margin-bottom: 10px;
+  }
+  button {
+    margin-top: 10px;
+    width: 200px;
+    padding: 5px;
   }
 </style>
 </head>
 <body>
-<a href="https://github.com/beauterre/sketchTracer">back to code</a> v 26-12-2025-11-23
-<div id="uploadArea">
-  <label>1. Upload Original Image: <input type="file" id="originalInput" accept="image/*"></label>
-  <div id="originalPreview" style="margin-bottom:10px;"></div>
+<a href="https://github.com/beauterre/sketchTracer">back to code</a> v 26-12-2025-11-27
 
-  <label>2. Upload Target/Sketch Image: <input type="file" id="evolveInput" accept="image/*"></label>
-  <div id="evolvePreview" style="margin-bottom:10px;"></div>
+<!-- Phase 1: Upload Original Image -->
+<div id="phase1" class="uploadArea">
+  <label>Upload Original Image: <input type="file" id="originalInput" accept="image/*"></label>
+  <div id="originalPreview" class="preview"></div>
+  <button id="nextToPhase2" disabled>Next: Upload Target/Sketch</button>
 </div>
 
-<div id="container" style="display:none;">
-  <img id="original" src="" alt="Original">
-  <img id="evolve" src="" alt="Evolve" style="opacity:1;">
+<!-- Phase 2: Upload Target/Sketch Image -->
+<div id="phase2" class="uploadArea" style="display:none;">
+  <label>Upload Target/Sketch Image: <input type="file" id="evolveInput" accept="image/*"></label>
+  <div id="evolvePreview" class="preview"></div>
+  <button id="nextToPhase3" disabled>Next: Show Images</button>
+</div>
+
+<!-- Phase 3: Display Images for Tracing -->
+<div id="phase3" style="display:none;">
+  <div id="container">
+    <img id="original" src="" alt="Original">
+    <img id="evolve" src="" alt="Evolve" style="opacity:1;">
+  </div>
+  <p>Use keys 1-2 for opacity and 3-6 for fade speed. Zoom with browser, scroll as needed.</p>
 </div>
 
 <script>
-const container = document.getElementById('container');
 const originalImg = document.getElementById('original');
 const evolveImg = document.getElementById('evolve');
-
 let opacity = 1;
 let interval = null;
 let fadeSpeed = 100;
-
-// Map keys to fade speeds in ms
 const speedMap = { '3': 50, '4': 100, '5': 250, '6': 500 };
 
+// Handle file uploads with preview
+function handleFileInput(input, imgElement, previewDiv, nextButton) {
+  const file = input.files[0];
+  if(file) {
+    const url = URL.createObjectURL(file);
+    imgElement.src = url;
+
+    const previewImg = document.createElement('img');
+    previewImg.src = url;
+    previewImg.style.maxWidth = "100px";
+    previewImg.style.maxHeight = "100px";
+    previewImg.style.display = "block";
+    previewImg.style.marginTop = "5px";
+
+    previewImg.onload = () => {
+      const sizeInfo = document.createElement('span');
+      sizeInfo.textContent = `Actual size: ${previewImg.naturalWidth} x ${previewImg.naturalHeight}px`;
+      sizeInfo.style.display = "block";
+      previewDiv.innerHTML = "";
+      previewDiv.appendChild(previewImg);
+      previewDiv.appendChild(sizeInfo);
+      imgElement.style.width = "200px"; // preview mode
+      nextButton.disabled = false; // enable next phase button
+    };
+  }
+}
+
+// Phase 1
+const nextToPhase2 = document.getElementById('nextToPhase2');
+document.getElementById('originalInput').addEventListener('change', (e) => {
+  handleFileInput(e.target, originalImg, document.getElementById('originalPreview'), nextToPhase2);
+});
+
+nextToPhase2.addEventListener('click', () => {
+  document.getElementById('phase1').style.display = 'none';
+  document.getElementById('phase2').style.display = 'flex';
+});
+
+// Phase 2
+const nextToPhase3 = document.getElementById('nextToPhase3');
+document.getElementById('evolveInput').addEventListener('change', (e) => {
+  handleFileInput(e.target, evolveImg, document.getElementById('evolvePreview'), nextToPhase3);
+});
+
+nextToPhase3.addEventListener('click', () => {
+  document.getElementById('phase2').style.display = 'none';
+  document.getElementById('phase3').style.display = 'block';
+  startFading();
+});
+
+// Opacity and fade controls
 function setOpacity(value) {
   opacity = Math.max(0, Math.min(1, value));
   evolveImg.style.opacity = opacity;
@@ -77,56 +146,6 @@ function startFading() {
   }, fadeSpeed);
 }
 
-// Handle file uploads
-// Handle file uploads with preview
-function handleFileInput(input, imgElement, previewDiv) {
-  const file = input.files[0];
-  if(file) {
-    const url = URL.createObjectURL(file);
-    imgElement.src = url;
-
-    // Create preview
-    const previewImg = document.createElement('img');
-    previewImg.src = url;
-    previewImg.style.maxWidth = "100px";
-    previewImg.style.maxHeight = "100px";
-    previewImg.style.display = "block";
-    previewImg.style.marginTop = "5px";
-
-    // Show actual size once loaded
-    previewImg.onload = () => {
-      const sizeInfo = document.createElement('span');
-      sizeInfo.textContent = `Actual size: ${previewImg.naturalWidth} x ${previewImg.naturalHeight}px`;
-      sizeInfo.style.display = "block";
-      previewDiv.innerHTML = ""; // clear previous preview
-      previewDiv.appendChild(previewImg);
-      previewDiv.appendChild(sizeInfo);
-
-      // Set imgElement in preview mode
-      imgElement.style.width = "200px"; // preview mode
-    };
-  }
-}
-
-document.getElementById('originalInput').addEventListener('change', (e) => {
-  handleFileInput(e.target, originalImg, document.getElementById('originalPreview'));
-  checkAllLoaded();
-});
-
-document.getElementById('evolveInput').addEventListener('change', (e) => {
-  handleFileInput(e.target, evolveImg, document.getElementById('evolvePreview'));
-  checkAllLoaded();
-});
-
-  function checkAllLoaded() {
-  if(originalImg.src && evolveImg.src) {
-    container.style.display = 'block';
-    document.getElementById('uploadArea').style.display = 'none';
-    startFading();
-  }
-}
-
-// Keyboard controls
 document.addEventListener('keydown', (e) => {
   const key = e.key;
   if(speedMap[key]) {
