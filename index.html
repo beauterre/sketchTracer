@@ -47,7 +47,7 @@
 </style>
 </head>
 <body>
-<a href="https://github.com/beauterre/sketchTracer">back to code</a> v 26-12-2025-11-45
+<a href="https://github.com/beauterre/sketchTracer">back to code</a> v 26-12-2025-11-50
 
 <!-- Phase 1: Upload Original Image -->
 <div id="phase1" class="uploadArea">
@@ -69,7 +69,7 @@
     <img id="original" src="" alt="Original">
     <img id="evolve" src="" alt="Evolve" style="opacity:1;">
   </div>
-  <p>Keys: 1 → transparent, 2 → opaque, 3 → fast, 4 → medium, 5 → slow, 6 → stopped fade. Zoom with browser, scroll as needed.</p>
+  <p>Keys: 1 → transparent, 2 → opaque, 3 → fast, 4 → medium, 5 → slow, 6 → stop fade. Zoom with browser, scroll as needed.</p>
 </div>
 
 <script>
@@ -78,14 +78,15 @@ const evolveImg = document.getElementById('evolve');
 
 let opacity = 1;
 let interval = null;
-let fadeSpeed = 0; // milliseconds between opacity steps, 0 = stopped
+let fadeSpeed = 50; // default medium
+let fadeDirection = -1; // -1 = fading out, 1 = fading in
 
 // Key to fade speed mapping
 const speedMap = {
-  '3': 20,    // fast
-  '4': 50,    // medium
-  '5': 150,   // slow
-  '6': 0      // stopped
+  '3': 20,   // fast
+  '4': 50,   // medium
+  '5': 150,  // slow
+  '6': 0     // stopped
 };
 
 // Handle file uploads with preview
@@ -137,7 +138,7 @@ nextToPhase3.addEventListener('click', () => {
   startFading();
 });
 
-// Fade logic
+// Fade logic: oscillating continuous fade
 function setOpacity(value) {
   opacity = Math.max(0, Math.min(1, value));
   evolveImg.style.opacity = opacity;
@@ -146,11 +147,17 @@ function setOpacity(value) {
 function startFading() {
   if(interval) clearInterval(interval);
   if(fadeSpeed === 0) return; // stopped
+
   interval = setInterval(() => {
-    if(opacity > 0) {
-      opacity -= 0.01;
-      evolveImg.style.opacity = opacity;
+    opacity += fadeDirection * 0.01;
+    if(opacity <= 0) {
+      opacity = 0;
+      fadeDirection = 1;
+    } else if(opacity >= 1) {
+      opacity = 1;
+      fadeDirection = -1;
     }
+    evolveImg.style.opacity = opacity;
   }, fadeSpeed);
 }
 
@@ -162,8 +169,10 @@ document.addEventListener('keydown', (e) => {
     startFading();
   } else if(key === '1') {
     setOpacity(0);
+    if(interval) clearInterval(interval);
   } else if(key === '2') {
     setOpacity(1);
+    if(interval) clearInterval(interval);
   }
 });
 </script>
